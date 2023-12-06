@@ -5,8 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public GameObject cellPrefab;
-    public GameObject characterPrefab;
-
+    public CharacterManager characterManager;
     private Character[,] grid;
 
     int rows = 6;    // Số hàng
@@ -23,7 +22,7 @@ public class GameManager : MonoBehaviour
 
     public void InitializeGrid()
     {
-        grid = new Character[rows, columns];
+        grid = new Character[rows, columns * 2];
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
@@ -40,42 +39,42 @@ public class GameManager : MonoBehaviour
 
     public void AddInitialCharacters()
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 1; i++)
         {
-            int level = Random.Range(1, 4);
             string type = "Type " + i;
+            int level = Random.Range(1, 4);
+            float hp = Random.Range(30, 100);
+            float mana = Random.Range(20, 60);
+            float def = Random.Range(10, 20);
+            float attack = Random.Range(5, 15);
 
-            Character newCharacter = new Character(type, level);
+            Character newCharacter = characterManager.CreateCharacter(type, level, hp, mana, def, attack);
             Vector2Int position = FindEmptyCell();
 
             if (position.x != -1)
             {
                 grid[position.x, position.y] = newCharacter;
-                AddCharacterToCell(position.x, position.y);
+                AddCharacterToCell(position.x, position.y, newCharacter);
             }
         }
     }
 
-    public void ClearGrid()
+    void AddCharacterToCell(int row, int column, Character character)
     {
-        foreach (Transform child in transform)
+        float xPosition;
+
+        if (column < columns)
         {
-            Destroy(child.gameObject);
+            xPosition = gridStartPoint.x + column * spacingX;
+        } else
+        {
+            xPosition = - (gridStartPoint.x + (column - columns) * spacingX);
         }
 
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                grid[i, j] = null; // Làm sạch lưới
-            }
-        }
-    }
+        float yPosition = gridStartPoint.y - row * spacingY;
 
-    void AddCharacterToCell(int row, int column)
-    {
-        Vector2 cellPosition = new Vector2(row, column);
-        Instantiate(characterPrefab, cellPosition, Quaternion.identity);
+        Vector3 cellPosition = new Vector3(xPosition, yPosition, 0);
+        Instantiate(characterManager.characterPrefab, cellPosition, Quaternion.identity);
     }
 
     Vector2Int FindEmptyCell()
@@ -84,7 +83,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < rows; i++)
         {
-            for (int j = 0; j < columns; j++)
+            for (int j = 0; j < columns * 2; j++)
             {
                 if (grid[i, j] == null)
                 {
@@ -102,9 +101,21 @@ public class GameManager : MonoBehaviour
         return new Vector2Int(-1, 1); // Khong tim thay o trong
     }
 
-    public void OnButtonClick()
+    public void OnAddCharacterClick()
     {
-        ClearGrid();
         AddInitialCharacters();
+    }
+
+    public void OnRemoveCharacterClick()
+    {
+        characterManager.ClearGrid();
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns * 2; j++)
+            {
+                grid[i, j] = null; // Làm sạch lưới
+            }
+        }
     }
 }
