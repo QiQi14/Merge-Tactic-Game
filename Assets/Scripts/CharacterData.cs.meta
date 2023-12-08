@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fc7e0fca0cc286443af03c153cb2a96a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - normalAttack: {fileID: 11400000, guid: b909912b56d832740adce6e4642eab42, type: 2}
+  - passiveSkill: {fileID: 11400000, guid: 70192bf9267ddfc409fea402297c1791, type: 2}
+  - activeSkill: {fileID: 11400000, guid: 68447449e82893047a595efe1862943c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
