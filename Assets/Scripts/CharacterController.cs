@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-public class Charaa : MonoBehaviour
+public class Character : MonoBehaviour
 {
     public float maxHealth = 100f;
     public float currentHealth;
@@ -13,6 +14,8 @@ public class Charaa : MonoBehaviour
     public float attack = 20f;
     public float manaRegenPerHit = 30f;
     public float manaRegenPerSecond = 10f;
+    public int level = 1;
+    public TextMeshProUGUI TMP;
 
     void Start()
     {

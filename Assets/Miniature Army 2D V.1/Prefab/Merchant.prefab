@@ -439,7 +439,7 @@ GameObject:
   - component: {fileID: 942339711045118790}
   m_Layer: 0
   m_Name: Merchant
-  m_TagString: Untagged
+  m_TagString: Merchant
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -502,6 +502,8 @@ MonoBehaviour:
   attack: 20
   manaRegenPerHit: 30
   manaRegenPerSecond: 10
+  level: 1
+  m_Object: {fileID: 8331003335096755510}
 --- !u!1 &1000013350955496
 GameObject:
   m_ObjectHideFlags: 0

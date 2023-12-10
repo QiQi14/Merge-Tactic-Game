@@ -608,7 +608,7 @@ GameObject:
   - component: {fileID: 6609701491194691251}
   m_Layer: 0
   m_Name: Thief
-  m_TagString: Untagged
+  m_TagString: Thief
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -671,6 +671,8 @@ MonoBehaviour:
   attack: 20
   manaRegenPerHit: 30
   manaRegenPerSecond: 10
+  level: 1
+  m_Object: {fileID: 6857770521582689154}
 --- !u!1 &1000012730742446
 GameObject:
   m_ObjectHideFlags: 0

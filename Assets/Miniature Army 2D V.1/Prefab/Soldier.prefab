@@ -181,7 +181,7 @@ GameObject:
   - component: {fileID: 7803304165672493329}
   m_Layer: 0
   m_Name: Soldier
-  m_TagString: Untagged
+  m_TagString: Soldier
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -244,6 +244,8 @@ MonoBehaviour:
   attack: 20
   manaRegenPerHit: 30
   manaRegenPerSecond: 10
+  level: 1
+  m_Object: {fileID: 201356256484394728}
 --- !u!1 &1000011811995576
 GameObject:
   m_ObjectHideFlags: 0

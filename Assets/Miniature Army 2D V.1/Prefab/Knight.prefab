@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2469791303821935889}
   m_Layer: 0
   m_Name: Knight
-  m_TagString: Untagged
+  m_TagString: Knight
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -76,6 +76,8 @@ MonoBehaviour:
   attack: 20
   manaRegenPerHit: 30
   manaRegenPerSecond: 10
+  level: 1
+  m_Object: {fileID: 6256656197028430767}
 --- !u!1 &1000011164445256
 GameObject:
   m_ObjectHideFlags: 0

@@ -354,7 +354,7 @@ GameObject:
   - component: {fileID: 8807065384399857480}
   m_Layer: 0
   m_Name: Priest
-  m_TagString: Untagged
+  m_TagString: Priest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -417,6 +417,8 @@ MonoBehaviour:
   attack: 20
   manaRegenPerHit: 30
   manaRegenPerSecond: 10
+  level: 1
+  m_Object: {fileID: 7129266414700486862}
 --- !u!1 &1000013226060160
 GameObject:
   m_ObjectHideFlags: 0
