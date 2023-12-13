@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -9,13 +11,16 @@ public class GridControlPlayer01 : MonoBehaviour
     [SerializeField] GridMap _gridMap;
     [SerializeField] GameObject[] prefabsToSpawn;
     private List<Vector3Int> spawnedPrefabPositions = new List<Vector3Int>();
+    // List để lưu trữ thông tin về prefab đã spawn
+    private List<SpawnedPrefabInfo> spawnedPrefabInfos = new List<SpawnedPrefabInfo>();
+    private int attemptCount = 0;
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            Vector3Int clickPosition = targetTilemap.WorldToCell(worldPoint);
+            //Vector3 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            //Vector3Int clickPosition = targetTilemap.WorldToCell(worldPoint);
         }
     }
     public void SpawnRandomPrefab()
@@ -29,13 +34,21 @@ public class GridControlPlayer01 : MonoBehaviour
         int randomX, randomY;
         Vector3Int randomCellPosition;
 
-
+        int maxAttempts = 100; // Giới hạn số lần thử tìm vị trí
+        attemptCount = 0;
         // Lặp để chọn một vị trí chưa spawn prefab
         do
         {
-             randomX = Random.Range(0, _gridMap.length);
-             randomY = Random.Range(0, _gridMap.height);
+            randomX = Random.Range(0, _gridMap.length);
+            randomY = Random.Range(0, _gridMap.height);
             randomCellPosition = new Vector3Int(randomX, randomY, 0);
+
+            attemptCount++;
+            if (attemptCount > maxAttempts)
+            {
+                Debug.LogError("Failed to find a free position for the prefab after " + maxAttempts + " attempts.");
+                return;
+            }
         } while (spawnedPrefabPositions.Contains(randomCellPosition));
 
         // Kiểm tra xem vị trí đã có trong danh sách chưa
@@ -45,7 +58,15 @@ public class GridControlPlayer01 : MonoBehaviour
 
             // Random một prefab từ mảng và spawn tại vị trí ngẫu nhiên trên tilemap
             GameObject randomPrefab = prefabsToSpawn[Random.Range(0, prefabsToSpawn.Length)];
-            Instantiate(randomPrefab, spawnPosition, Quaternion.identity);
+            GameObject instantiatedPrefab =  Instantiate(randomPrefab, spawnPosition, Quaternion.identity);
+
+            // Lưu thông tin về prefab đã spawn
+            SpawnedPrefabInfo prefabInfo = new SpawnedPrefabInfo
+            {
+                prefab = instantiatedPrefab,
+                position = randomCellPosition
+            };
+            spawnedPrefabInfos.Add(prefabInfo);
 
             // Lưu trữ vị trí đã spawn prefab
             spawnedPrefabPositions.Add(randomCellPosition);
@@ -60,26 +81,15 @@ public class GridControlPlayer01 : MonoBehaviour
     // Hàm để kiểm tra và thực hiện merge nhân vật
     public void MergeCharacters()
     {
-        // Tạo một Dictionary để lưu trữ danh sách prefab theo loại và level
         Dictionary<string, List<GameObject>> prefabDict = new Dictionary<string, List<GameObject>>();
 
-        // Duyệt qua danh sách prefab đã spawn
-        foreach (var spawnedPrefabPosition in spawnedPrefabPositions)
+        foreach (var prefabInfo in spawnedPrefabInfos)
         {
-            Vector3Int cellPosition = targetTilemap.WorldToCell(spawnedPrefabPosition);
-            GameObject spawnedPrefab = targetTilemap.GetInstantiatedObject(cellPosition);
-
-            // Lấy prefab tại vị trí hiện tại
-            //GameObject spawnedPrefab = targetTilemap.GetInstantiatedObject(spawnedPrefabPosition);
-            Debug.Log("Checking position: " + spawnedPrefabPosition);
-            Debug.Log("Tilemap bounds: " + targetTilemap.cellBounds);
-
+            GameObject spawnedPrefab = prefabInfo.prefab;
             if (spawnedPrefab != null)
             {
-                // Lấy hoặc tạo danh sách prefab theo loại và level
                 string prefabType = spawnedPrefab.tag;
                 int prefabLevel = spawnedPrefab.GetComponent<Character>().level;
-
                 string key = prefabType + "_" + prefabLevel;
 
                 if (!prefabDict.ContainsKey(key))
@@ -87,7 +97,6 @@ public class GridControlPlayer01 : MonoBehaviour
                     prefabDict[key] = new List<GameObject>();
                 }
 
-                // Thêm prefab vào danh sách
                 prefabDict[key].Add(spawnedPrefab);
             }
             else
@@ -97,68 +106,69 @@ public class GridControlPlayer01 : MonoBehaviour
         }
 
         // Duyệt qua từng loại prefab và level
-        foreach (var prefabList in prefabDict.Values)
+        foreach (var key in prefabDict.Keys.ToList())
         {
-            // Kiểm tra tổng số prefab của từng loại và level
-            int totalPrefabs = prefabList.Count;
+            List<GameObject> prefabsOfSameTypeAndLevel = prefabDict[key];
+            int level = prefabsOfSameTypeAndLevel[0].GetComponent<Character>().level;
 
-            // Duyệt qua danh sách prefab của từng loại và level
-            foreach (var spawnedPrefab in prefabList)
+            while (prefabsOfSameTypeAndLevel.Count >= 2 && level < 3)
             {
-                // Kiểm tra xem prefab có thể merge với các prefab khác trên tilemap hay không
-                if (CanMerge(prefabList, spawnedPrefab))
+                for (int i = 0; i < prefabsOfSameTypeAndLevel.Count - 1; i += 2)
                 {
-                    // Thực hiện merge bằng cách tăng level và cập nhật text
-                    spawnedPrefab.GetComponent<Character>().level++;
-                    spawnedPrefab.GetComponent<Character>().TMP.text = spawnedPrefab.GetComponent<Character>().level.ToString();
+                    if (i + 1 >= prefabsOfSameTypeAndLevel.Count) break;
+                    // Tạo prefab mới ở level cao hơn
+                    GameObject newPrefab = Instantiate(prefabsOfSameTypeAndLevel[i], prefabsOfSameTypeAndLevel[i + 1].transform.position, Quaternion.identity);
+                    newPrefab.GetComponent<Character>().level = level + 1;
+                    newPrefab.GetComponent<Character>().TMP.text = "Level 0" + newPrefab.GetComponent<Character>().level.ToString();
 
-                    // Xóa prefab khác tại vị trí hiện tại
-                    targetTilemap.SetTile(targetTilemap.WorldToCell(spawnedPrefab.transform.position), null);
+                    // Thêm prefab mới vào danh sách spawnedPrefabInfos
+                    spawnedPrefabInfos.Add(new SpawnedPrefabInfo { prefab = newPrefab, position = Vector3Int.RoundToInt(newPrefab.transform.position) });
+
+                    // Xác định vị trí của prefab cần xóa
+                    Vector3Int positionToRemove1 = spawnedPrefabInfos.Find(info => info.prefab == prefabsOfSameTypeAndLevel[i]).position;
+
+                    // Xóa prefab cũ
+                    Destroy(prefabsOfSameTypeAndLevel[i]);
+                    Destroy(prefabsOfSameTypeAndLevel[i + 1]);
+
+                    // Xóa vị trí của prefab cũ khỏi spawnedPrefabPositions
+                    spawnedPrefabPositions.Remove(positionToRemove1);
+
+                    // Xóa vị trí prefab trên tilemap
+                    spawnedPrefabInfos.RemoveAll(info => info.prefab == prefabsOfSameTypeAndLevel[i] || info.prefab == prefabsOfSameTypeAndLevel[i + 1]);
+
+
+                    // Cập nhật Dictionary với prefab mới
+                    string newKey = newPrefab.tag + "_" + (level + 1);
+                    if (!prefabDict.ContainsKey(newKey))
+                    {
+                        prefabDict[newKey] = new List<GameObject>();
+                    }
+                    prefabDict[newKey].Add(newPrefab);
+
+                    // Xóa prefab cũ khỏi Dictionary
+                    prefabsOfSameTypeAndLevel.RemoveAt(i + 1);
+                    prefabsOfSameTypeAndLevel.RemoveAt(i);
+
+                    // Đảm bảo cập nhật danh sách prefabsOfSameTypeAndLevel sau mỗi lần merge
+                    if (prefabDict.ContainsKey(newKey))
+                    {
+                        prefabsOfSameTypeAndLevel = prefabDict[newKey];
+                    }
                 }
-            }
 
-            // Kiểm tra và merge level 1 thành level 2
-            if (totalPrefabs >= 2 && prefabList[0].GetComponent<Character>().level == 1)
-            {
-                // Merge level 1 thành level 2
-                prefabList[0].GetComponent<Character>().level++;
-                prefabList[1].GetComponent<Character>().level++;
-                prefabList[0].GetComponent<Character>().TMP.text = prefabList[0].GetComponent<Character>().level.ToString();
-                prefabList[1].GetComponent<Character>().TMP.text = prefabList[1].GetComponent<Character>().level.ToString();
-            }
-
-            // Kiểm tra và merge level 2 thành level 3
-            if (totalPrefabs >= 2 && prefabList[0].GetComponent<Character>().level == 2)
-            {
-                // Merge level 2 thành level 3
-                prefabList[0].GetComponent<Character>().level++;
-                prefabList[1].GetComponent<Character>().level++;
-                prefabList[0].GetComponent<Character>().TMP.text = prefabList[0].GetComponent<Character>().level.ToString();
-                prefabList[1].GetComponent<Character>().TMP.text = prefabList[1].GetComponent<Character>().level.ToString();
+                // Cập nhật level cho vòng lặp tiếp theo
+                level++;
             }
         }
+
+
     }
 
-    // Hàm kiểm tra xem prefab có thể merge với các prefab khác trên tilemap hay không
-    private bool CanMerge(List<GameObject> prefabList, GameObject currentPrefab)
+    // Class để lưu thông tin về prefab đã spawn
+    private class SpawnedPrefabInfo
     {
-        Character currentCharacterController = currentPrefab.GetComponent<Character>();
-
-        foreach (var otherPrefab in prefabList)
-        {
-            if (currentPrefab != otherPrefab)
-            {
-                Character otherCharacterController = otherPrefab.GetComponent<Character>();
-
-                // Kiểm tra nếu level của hai prefab là giống nhau và level là 1 hoặc 2 thì có thể merge
-                if (currentCharacterController.level == otherCharacterController.level
-                    && (currentCharacterController.level == 1 || currentCharacterController.level == 2))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        public GameObject prefab;
+        public Vector3Int position;
     }
 }

@@ -418,7 +418,7 @@ MonoBehaviour:
   manaRegenPerHit: 30
   manaRegenPerSecond: 10
   level: 1
-  m_Object: {fileID: 7129266414700486862}
+  TMP: {fileID: 7129266414700486862}
 --- !u!1 &1000013226060160
 GameObject:
   m_ObjectHideFlags: 0
