@@ -121,11 +121,17 @@ public class GridControlPlayer01 : MonoBehaviour
                     newPrefab.GetComponent<Character>().level = level + 1;
                     newPrefab.GetComponent<Character>().TMP.text = "Level 0" + newPrefab.GetComponent<Character>().level.ToString();
 
+                    // Xác định vị trí của prefab mới dựa trên vị trí của prefab tại i + 1
+                    Vector3Int newPrefabPosition = spawnedPrefabInfos.Find(info => info.prefab == prefabsOfSameTypeAndLevel[i + 1]).position;
+
                     // Thêm prefab mới vào danh sách spawnedPrefabInfos
-                    spawnedPrefabInfos.Add(new SpawnedPrefabInfo { prefab = newPrefab, position = Vector3Int.RoundToInt(newPrefab.transform.position) });
+                    spawnedPrefabInfos.Add(new SpawnedPrefabInfo { prefab = newPrefab, position = newPrefabPosition });
+
+                    
 
                     // Xác định vị trí của prefab cần xóa
                     Vector3Int positionToRemove1 = spawnedPrefabInfos.Find(info => info.prefab == prefabsOfSameTypeAndLevel[i]).position;
+                    //Vector3Int positionToRemove2 = spawnedPrefabInfos.Find(info => info.prefab == prefabsOfSameTypeAndLevel[i + 1]).position;
 
                     // Xóa prefab cũ
                     Destroy(prefabsOfSameTypeAndLevel[i]);
@@ -133,6 +139,10 @@ public class GridControlPlayer01 : MonoBehaviour
 
                     // Xóa vị trí của prefab cũ khỏi spawnedPrefabPositions
                     spawnedPrefabPositions.Remove(positionToRemove1);
+                    //spawnedPrefabPositions.Remove(positionToRemove2);
+
+                    // Lưu trữ vị trí đã spawn prefab
+                    //spawnedPrefabPositions.Add(Vector3Int.RoundToInt(newPrefab.transform.position));
 
                     // Xóa vị trí prefab trên tilemap
                     spawnedPrefabInfos.RemoveAll(info => info.prefab == prefabsOfSameTypeAndLevel[i] || info.prefab == prefabsOfSameTypeAndLevel[i + 1]);
