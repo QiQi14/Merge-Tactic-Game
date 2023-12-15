@@ -11,3 +11,5 @@ Mỗi nhân vật có 3 skill set: normal attack, passive & active skill, active
 
 Thiết kế khoảng 6 nhân vật cho tựa game
 
+Thực hiện implement tìm đường bằng 1 trong các thuật toán tìm đường phổ biến và combat logic cho tựa game
+
