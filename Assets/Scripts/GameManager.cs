@@ -41,16 +41,19 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < 1; i++)
         {
-            string type = "Type " + i;
+            string type = "Type " + Random.Range(1,5);
             int level = Random.Range(1, 4);
-            float hp = Random.Range(30, 100);
-            float mana = Random.Range(20, 60);
-            float def = Random.Range(10, 20);
-            float attack = Random.Range(5, 15);
-
-            Character newCharacter = characterManager.CreateCharacter(type, level, hp, mana, def, attack);
+            Debug.Log($"Creating character: {type}, Level: {level}");
+            CharacterStats stats = ScriptableObject.CreateInstance<CharacterStats>();
+            stats.hp = Random.Range(30, 100);
+            stats.mana = Random.Range(20, 60);
+            stats.def = Random.Range(10, 20);
+            stats.attack = Random.Range(5, 15);
+            stats.manaRegenRate = 0.1f;
+            Debug.Log($"Stats - HP: {stats.hp}, Mana: {stats.mana}, Def: {stats.def}, Attack: {stats.attack}");
+            Character newCharacter = characterManager.CreateCharacter(type, level, stats);
             Vector2Int position = FindEmptyCell();
-
+            Debug.Log($"Character position: {position}");
             if (position.x != -1)
             {
                 grid[position.x, position.y] = newCharacter;
@@ -74,7 +77,8 @@ public class GameManager : MonoBehaviour
         float yPosition = gridStartPoint.y - row * spacingY;
 
         Vector3 cellPosition = new Vector3(xPosition, yPosition, 0);
-        Instantiate(characterManager.characterPrefab, cellPosition, Quaternion.identity);
+        GameObject createdCharacter = Instantiate(characterManager.characterPrefab, cellPosition, Quaternion.identity);
+        Debug.Log("Created character prefab at: " + cellPosition + ", active: " + createdCharacter.activeSelf);
     }
 
     Vector2Int FindEmptyCell()

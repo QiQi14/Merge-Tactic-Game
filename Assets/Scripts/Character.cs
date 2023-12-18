@@ -65,24 +65,16 @@ public class Character
 
     public string type;
     public int level;
-    public float hp;
-    public float mana;
-    public float def;
-    public float attack;
-    public float manaRegenRate;
+    public CharacterStats stats;
     public ISkill[] skills;
     public ISkill activeSkill;
 
 
-    public Character(string type, int level, float hp, float mana, float def, float attack) 
+    public Character(string type, int level, CharacterStats stats) 
     {
         this.type = type;
         this.level = level;
-        this.hp = hp;
-        this.mana = mana;
-        this.def = def; 
-        this.attack = attack;
-        this.manaRegenRate = 0.1f; // hoi 10% mana moi giay
+        this.stats = stats;
         this.skills = new ISkill[3]; // mang 3 ky nang    
     }
 
@@ -121,22 +113,22 @@ public class Character
 
     public void RegenManaOnAttack()
     {
-        mana += mana * 0.3f; // hoi mana tren moi don danh
-        mana = Mathf.Min(mana, 100f); // mana toi da la 100
+        stats.mana += stats.mana * 0.3f; // hoi mana tren moi don danh
+        stats.mana = Mathf.Min(stats.mana, 100f); // mana toi da la 100
     }
 
     public void RegenManaOverTime()
     {
-        mana += mana * manaRegenRate;
-        mana = Mathf.Min(mana, 100f);
+        stats.mana += stats.mana * stats.manaRegenRate;
+        stats.mana = Mathf.Min(stats.mana, 100f);
     }
 
     public void CheckAndActiveSkill()
     {
-        if (mana >= 100f && activeSkill != null)
+        if (stats.mana >= 100f && activeSkill != null)
         {
             activeSkill.PerformSkill();
-            mana = 0; // reset mana sau khi active ki nang
+            stats.mana = 0; // reset mana sau khi active ki nang
         }
     }
 }

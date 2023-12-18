@@ -10,18 +10,22 @@ public class CharacterManager : MonoBehaviour
     private List<Character> characters = new List<Character>();
     private List<Character> mergedCharacters = new List<Character>();
 
-    public Character CreateCharacter(string type, int level, float hp, float mana, float def, float attack)
+    public Character CreateCharacter(string type, int level, CharacterStats stats)
     {
-        Debug.Log($"Character Created: Type={type}, Level={level}, HP={hp}, Mana={mana}, Defense={def}, Attack={attack}");
-        Character newCharacter = new Character(type, level, hp, mana, def, attack);
+        Debug.Log($"Character Created: Type={type}, Level={level}");
+        Character newCharacter = new Character(type, level, stats);
         newCharacter.SetSkill(0, new PassiveSkill("Passive Ability"));
         newCharacter.SetSkill(1, new NormalAttackSkill("Normal Attack"));
         newCharacter.SetSkill(2, new UltimateAttackSkill("Ultimate Attack"));
+
+        characters.Add(newCharacter);
+
         return newCharacter;
     }
 
-    /*public void MergeCharacters()
+    public void MergeCharacters()
     {
+        Debug.Log($"Starting Merge. Character count: {characters.Count}");
         characters.Sort((c1, c2) =>
         {
             int typeComparison = c1.type.CompareTo(c2.type);
@@ -33,12 +37,24 @@ public class CharacterManager : MonoBehaviour
         {
             if (characters[i].type == characters[i + 1].type && characters[i].level == characters[i + 1].level)
             {
-                Character mergedCharacter = new Character(characters[i].type, characters[i].level + 1);
-                mergedCharacters.Add(mergedCharacter);
-                i++; // Bỏ qua nhân vật tiếp theo vì đã được merge
+                characters[i].level++; // Tăng cấp độ của nhân vật thứ nhất
+
+                Debug.Log($"Merged character at index {i} to level {characters[i].level}");
+                characters.RemoveAt(i + 1); // Xóa nhân vật thứ hai
+            }
+            else
+            {
+                mergedCharacters.Add(characters[i]); // Thêm nhân vật không được merge vào mergedCharacters
+                Debug.Log($"Characters at index {i} and {i + 1} do not match for merge");
             }
         }
-    }*/
+
+        if (characters.Count > 0 && !mergedCharacters.Contains(characters[characters.Count - 1]))
+        {
+            mergedCharacters.Add(characters[characters.Count - 1]);
+        }
+        characters = new List<Character>(mergedCharacters); // Cập nhật danh sách nhân vật
+    }
 
     private void Update()
     {
